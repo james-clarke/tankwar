@@ -11,13 +11,14 @@ public class GameWorld {
 
     private final List<GameObject> objects = new ArrayList<>();
 
-    // we track just one player tank for convenience.
+    // we track just one player tank to make it simple
     private Tank playerTank;
 
     public void addObject(GameObject obj) {
         if (obj != null) {
             objects.add(obj);
             if (obj instanceof Tank tank && playerTank == null) {
+                // First tank we add becomes the "player" by convention
                 playerTank = tank;
             }
         }
@@ -26,7 +27,11 @@ public class GameWorld {
     public void update(double deltaSeconds) {
         // Update everything
         for (GameObject obj : objects) {
-            obj.update(deltaSeconds);
+            if (obj instanceof Tank tank) {
+                tank.updateWithWorld(this, deltaSeconds);
+            } else {
+                obj.update(deltaSeconds);
+            }
         }
 
         // Remove unused objects

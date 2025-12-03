@@ -3,11 +3,13 @@ package tankwar.model;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-
 public class Tank extends GameObject {
 
     private Direction direction = Direction.UP;
     private int health = 100;
+
+    // Strategy pattern
+    private TankBehavior behavior;
 
     public Tank(double x, double y, double size) {
         super(x, y, size, size);
@@ -15,7 +17,13 @@ public class Tank extends GameObject {
 
     @Override
     public void update(double deltaSeconds) {
-        // Nothing yet
+        // Void: do nothing.
+    }
+
+    public void updateWithWorld(GameWorld world, double deltaSeconds) {
+        if (behavior != null) {
+            behavior.update(this, world, deltaSeconds);
+        }
     }
 
     @Override
@@ -38,5 +46,9 @@ public class Tank extends GameObject {
 
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public void setBehavior(TankBehavior behavior) {
+        this.behavior = behavior;
     }
 }

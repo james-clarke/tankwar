@@ -5,40 +5,74 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import tankwar.model.GameConfig;
+import tankwar.model.GameObjectFactory;
 import tankwar.model.GameWorld;
+import tankwar.model.InputState;
 import tankwar.model.Tank;
 import tankwar.model.Wall;
 
 public class TankWarApp extends Application {
-
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 600;
 
     private GameWorld world;
     private long lastFrameTimeNanos = 0;
 
     @Override
     public void start(Stage primaryStage) {
-        Canvas canvas = new Canvas(WIDTH, HEIGHT);
+        GameConfig config = GameConfig.getInstance();
+
+        Canvas canvas = new Canvas(config.getWorldWidth(), config.getWorldHeight());
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         StackPane root = new StackPane(canvas);
-        Scene scene = new Scene(root, WIDTH, HEIGHT);
+        Scene scene = new Scene(root, config.getWorldWidth(), config.getWorldHeight());
 
         primaryStage.setTitle("Tank War");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Create the world and add a test tank + wall
         world = new GameWorld();
 
-        Tank player = new Tank(100, 100, 40);
+        InputState inputState = new InputState();
+        GameObjectFactory factory = new GameObjectFactory(inputState);
+
+        // Player tank
+        Tank player = factory.createPlayerTank(100, 100);
         world.addObject(player);
 
-        Wall wall = new Wall(300, 200, 80, 40);
+        // Enemy tank
+        Tank enemy = factory.createEnemyTank(400, 300);
+        world.addObject(enemy);
+
+        // Wall
+        Wall wall = factory.createWall(300, 200, 80, 40);
         world.addObject(wall);
+
+        // Keyboard input handlers
+        scene.setOnKeyPressed(event -> {
+            KeyCode code = event.getCode();
+            switch (code) {
+                case W, UP -> inputState.setUp(true);
+                case S, DOWN -> inputState.setDown(true);
+                case A, LEFT -> inputState.setLeft(true);
+                case D, RIGHT -> inputState.setRight(true);
+                case SPACE -> inputState.setFire(true);
+            }
+        });
+
+        scene.setOnKeyReleased(event -> {
+            KeyCode code = event.getCode();
+            switch (code) {
+                case W, UP -> inputState.setUp(false);
+                case S, DOWN -> inputState.setDown(false);
+                case A, LEFT -> inputState.setLeft(false);
+                case D, RIGHT -> inputState.setRight(false);
+                case SPACE -> inputState.setFire(false);
+            }
+        });
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -51,7 +85,7 @@ public class TankWarApp extends Application {
                 double deltaSeconds = (now - lastFrameTimeNanos) / 1_000_000_000.0;
                 lastFrameTimeNanos = now;
 
-                gc.clearRect(0, 0, WIDTH, HEIGHT);
+                gc.clearRect(0, 0, config.getWorldWidth(), config.getWorldHeight());
 
                 world.update(deltaSeconds);
                 world.render(gc);
