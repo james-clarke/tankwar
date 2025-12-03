@@ -76,6 +76,10 @@ public class Tank extends GameObject {
         this.behavior = behavior;
     }
 
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
     public TankBehavior getBehavior() {
         return behavior;
     }

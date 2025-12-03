@@ -4,5 +4,6 @@ public enum GameEventType {
     PLAYER_HIT,
     ENEMY_HIT,
     PLAYER_DESTROYED,
-    ENEMY_DESTROYED
+    ENEMY_DESTROYED,
+    PLAYER_HEALED
 }

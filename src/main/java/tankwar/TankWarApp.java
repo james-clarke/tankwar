@@ -14,6 +14,7 @@ import tankwar.model.GameWorld;
 import tankwar.model.InputState;
 import tankwar.model.Tank;
 import tankwar.model.Wall;
+import tankwar.model.MedPack;
 
 import javafx.scene.paint.Color;
 import tankwar.model.GameEvent;
@@ -55,13 +56,27 @@ public class TankWarApp extends Application implements GameEventListener {
         Tank player = factory.createPlayerTank(100, 100);
         world.addObject(player);
 
-        // Enemy tank
-        Tank enemy = factory.createEnemyTank(400, 300);
-        world.addObject(enemy);
+        // Enemies
+        Tank enemy1 = factory.createEnemyTank(400, 300);
+        Tank enemy2 = factory.createEnemyTank(600, 200);
+        Tank enemy3 = factory.createEnemyTank(200, 250);
+        world.addObject(enemy1);
+        world.addObject(enemy2);
+        world.addObject(enemy3);
 
-        // Wall
-        Wall wall = factory.createWall(300, 200, 80, 40);
-        world.addObject(wall);
+        // Walls
+        Wall wall1 = factory.createWall(300, 200, 80, 40);
+        Wall wall2 = factory.createWall(500, 150, 80, 40);
+        Wall wall3 = factory.createWall(200, 350, 80, 40);
+        world.addObject(wall1);
+        world.addObject(wall2);
+        world.addObject(wall3);
+
+        // Med packs
+        MedPack pack1 = factory.createMedPack(150, 450);
+        MedPack pack2 = factory.createMedPack(600, 400);
+        world.addObject(pack1);
+        world.addObject(pack2);
 
         // Keyboard input handlers
         scene.setOnKeyPressed(event -> {
@@ -114,6 +129,9 @@ public class TankWarApp extends Application implements GameEventListener {
                 gc.setFill(Color.BLACK);
                 gc.fillText("Score: " + score, 10, 20);
                 gc.fillText("Health: " + playerHealth, 10, 40);
+                int enemies = world.getEnemyCount();
+                gc.fillText("Enemies: " + enemies, 10, 60);
+                gc.fillText("Controls: Move = WASD / Arrows, Shoot = SPACE", 10, 80);
 
                 if (gameOver) {
                     gc.setFill(Color.RED);
@@ -145,6 +163,11 @@ public class TankWarApp extends Application implements GameEventListener {
             }
             case ENEMY_DESTROYED -> {
                 score += 100; // keeping scores
+            }
+            case PLAYER_HEALED -> {
+                if (event.getTank() != null) {
+                    playerHealth = event.getTank().getHealth();
+                }
             }
         }
     }
