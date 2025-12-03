@@ -7,11 +7,18 @@ public class Missile extends GameObject {
 
     private Direction direction;
     private double speed;
+    private final boolean fromPlayer;
 
-    public Missile(double x, double y, double size, Direction direction, double speed) {
+    public Missile(double x,
+                   double y,
+                   double size,
+                   Direction direction,
+                   double speed,
+                   boolean fromPlayer) {
         super(x, y, size, size);
         this.direction = direction;
         this.speed = speed;
+        this.fromPlayer = fromPlayer;
     }
 
     @Override
@@ -23,11 +30,16 @@ public class Missile extends GameObject {
             case LEFT -> x -= distance;
             case RIGHT -> x += distance;
         }
+        // collisions handled by GameWorld
     }
 
     @Override
     public void render(GraphicsContext gc) {
         gc.setFill(Color.RED);
         gc.fillOval(x, y, width, height);
+    }
+
+    public boolean isFromPlayer() {
+        return fromPlayer;
     }
 }

@@ -9,7 +9,6 @@ package tankwar.model;
 public class GameObjectFactory {
 
     private final GameConfig config = GameConfig.getInstance();
-
     private final InputState inputState;
 
     public GameObjectFactory(InputState inputState) {
@@ -42,16 +41,17 @@ public class GameObjectFactory {
         return new MedPack(x, y, size);
     }
 
-    // creating tanks
+    // creating missiles
     // missiles "owned" by tank object
-    public Missile createMissileFromTank(Tank tank) {
+    public Missile createMissileFromTank(Tank tank, boolean fromPlayer) {
         double size = 10;
         double speed = config.getMissileSpeed();
-        double startX = tank.getX() + (tank.width - size) / 2.0;
-        double startY = tank.getY() + (tank.height - size) / 2.0;
+
+        double startX = tank.getX() + (tank.getWidth() - size) / 2.0;
+        double startY = tank.getY() + (tank.getHeight() - size) / 2.0;
 
         Direction dir = tank.getDirection();
-        return new Missile(startX, startY, size, dir, speed);
+        return new Missile(startX, startY, size, dir, speed, fromPlayer);
     }
 
     // explosions

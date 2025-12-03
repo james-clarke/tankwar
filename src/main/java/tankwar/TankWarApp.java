@@ -34,10 +34,9 @@ public class TankWarApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        world = new GameWorld();
-
         InputState inputState = new InputState();
         GameObjectFactory factory = new GameObjectFactory(inputState);
+        world = new GameWorld(factory);
 
         // Player tank
         Tank player = factory.createPlayerTank(100, 100);
@@ -53,24 +52,32 @@ public class TankWarApp extends Application {
 
         // Keyboard input handlers
         scene.setOnKeyPressed(event -> {
-            KeyCode code = event.getCode();
-            switch (code) {
+            switch (event.getCode()) {
                 case W, UP -> inputState.setUp(true);
                 case S, DOWN -> inputState.setDown(true);
                 case A, LEFT -> inputState.setLeft(true);
                 case D, RIGHT -> inputState.setRight(true);
                 case SPACE -> inputState.setFire(true);
+
+                // DEBUG: K key kills the player tank to demonstrate State transitions
+                case K -> {
+                    Tank playerTank = world.getPlayerTank();
+                    if (playerTank != null) {
+                        playerTank.damage(999);
+                    }
+                }
+                default -> { }
             }
         });
 
         scene.setOnKeyReleased(event -> {
-            KeyCode code = event.getCode();
-            switch (code) {
+            switch (event.getCode()) {
                 case W, UP -> inputState.setUp(false);
                 case S, DOWN -> inputState.setDown(false);
                 case A, LEFT -> inputState.setLeft(false);
                 case D, RIGHT -> inputState.setRight(false);
                 case SPACE -> inputState.setFire(false);
+                default -> { }
             }
         });
 
