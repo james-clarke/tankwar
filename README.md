@@ -2,6 +2,8 @@
 
 A simple 2D tank game implemented in Java 21 using JavaFX and Maven.
 
+![](tankwar-demo.mp4)
+
 GitHub repository: https://github.com/james-clarke/tankwar
 
 The project demonstrates the following design patterns:
