@@ -6,18 +6,39 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
+/**
+ * Game world: owns all GameObjects and acts as the Subject in the Observer pattern.
+ */
 public class GameWorld {
 
     private final List<GameObject> objects = new ArrayList<>();
     private final GameObjectFactory factory;
     private final GameConfig config = GameConfig.getInstance();
 
+    private final List<GameEventListener> listeners = new ArrayList<>();
+
     // For now we track just one player tank for convenience.
     private Tank playerTank;
 
     public GameWorld(GameObjectFactory factory) {
         this.factory = factory;
+    }
+
+    // observer pattern
+    public void addListener(GameEventListener listener) {
+        if (listener != null && !listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+
+    public void removeListener(GameEventListener listener) {
+        listeners.remove(listener);
+    }
+
+    public void notifyEvent(GameEvent event) {
+        for (GameEventListener listener : listeners) {
+            listener.onGameEvent(event);
+        }
     }
 
     public void addObject(GameObject obj) {
@@ -30,27 +51,46 @@ public class GameWorld {
     }
 
     public void update(double deltaSeconds) {
-        // Update everything
-        for (GameObject obj : objects) {
-            if (obj instanceof Tank tank) {
-                tank.updateWithWorld(this, deltaSeconds);
-            } else {
-                obj.update(deltaSeconds);
-            }
-        }
-
-        // collisions
-        handleCollisions();
-
-        // Remove unused objects
-        Iterator<GameObject> it = objects.iterator();
-        while (it.hasNext()) {
-            GameObject obj = it.next();
-            if (!obj.isActive()) {
-                it.remove();
-            }
+    List<Wall> walls = new ArrayList<>();
+    for (GameObject obj : objects) {
+        if (obj instanceof Wall w) {
+            walls.add(w);
         }
     }
+
+    // Update everything in scene
+    for (GameObject obj : objects) {
+        if (obj instanceof Tank tank) {
+            // old position
+            double oldX = tank.getX();
+            double oldY = tank.getY();
+
+            tank.updateWithWorld(this, deltaSeconds);
+
+            for (Wall wall : walls) {
+                if (tank.intersects(wall)) {
+                    tank.x = oldX;
+                    tank.y = oldY;
+                    break;
+                }
+            }
+        } else {
+            obj.update(deltaSeconds);
+        }
+    }
+
+    // detect and handle walls
+    handleCollisions();
+
+    // Remove unused objects
+    Iterator<GameObject> it = objects.iterator();
+    while (it.hasNext()) {
+        GameObject obj = it.next();
+        if (!obj.isActive()) {
+            it.remove();
+        }
+    }
+}
 
     public void render(GraphicsContext gc) {
         for (GameObject obj : objects) {
@@ -66,12 +106,13 @@ public class GameWorld {
         return objects;
     }
 
+    // creating missiles
     public void spawnMissileFromTank(Tank tank, boolean fromPlayer) {
         Missile missile = factory.createMissileFromTank(tank, fromPlayer);
         addObject(missile);
     }
 
-    // collision
+    // handling collisions
     private void handleCollisions() {
         List<Missile> missiles = new ArrayList<>();
         List<Tank> tanks = new ArrayList<>();
@@ -90,7 +131,7 @@ public class GameWorld {
         Tank player = getPlayerTank();
 
         for (Missile missile : missiles) {
-            // out of bounds
+            // out-of-bounds
             if (missile.getX() < 0 ||
                 missile.getX() > config.getWorldWidth() ||
                 missile.getY() < 0 ||
@@ -99,7 +140,7 @@ public class GameWorld {
                 continue;
             }
 
-            // missile and wall collision
+            // Missile adn walls
             boolean destroyed = false;
             for (Wall wall : walls) {
                 if (missile.intersects(wall)) {
@@ -112,9 +153,9 @@ public class GameWorld {
                 continue;
             }
 
-            // missile and tanks
+            // Missile and tanks
             if (missile.isFromPlayer()) {
-                // missiles hit enemy tanks
+                // missiles hit enemy tank
                 for (Tank t : tanks) {
                     if (t == player) {
                         continue;
@@ -122,14 +163,18 @@ public class GameWorld {
                     if (missile.intersects(t)) {
                         t.damage(50);
                         missile.deactivate();
+                        // notify of successful hit
+                        notifyEvent(new GameEvent(GameEventType.ENEMY_HIT, t));
                         break;
                     }
                 }
             } else {
-                // missiles hit the player tank
+                // missiles hit player tank
                 if (player != null && missile.intersects(player)) {
                     player.damage(50);
                     missile.deactivate();
+                    // notify of successful hit
+                    notifyEvent(new GameEvent(GameEventType.PLAYER_HIT, player));
                 }
             }
         }

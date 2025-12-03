@@ -2,6 +2,8 @@ package tankwar.model;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
+
 
 public class Missile extends GameObject {
 
@@ -35,8 +37,22 @@ public class Missile extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.setFill(Color.RED);
-        gc.fillOval(x, y, width, height);
+        Image sprite = getSprite();
+        if (sprite != null) {
+            gc.drawImage(sprite, x, y, width, height);
+        } else {
+            gc.setFill(Color.RED);
+            gc.fillOval(x, y, width, height);
+        }
+    }
+
+    private Image getSprite() {
+        return switch (direction) {
+            case UP -> ImageResources.MISSILE_UP;
+            case DOWN -> ImageResources.MISSILE_DOWN;
+            case LEFT -> ImageResources.MISSILE_LEFT;
+            case RIGHT -> ImageResources.MISSILE_RIGHT;
+        };
     }
 
     public boolean isFromPlayer() {

@@ -15,10 +15,20 @@ import tankwar.model.InputState;
 import tankwar.model.Tank;
 import tankwar.model.Wall;
 
-public class TankWarApp extends Application {
+import javafx.scene.paint.Color;
+import tankwar.model.GameEvent;
+import tankwar.model.GameEventListener;
+import tankwar.model.GameEventType;
+
+public class TankWarApp extends Application implements GameEventListener {
 
     private GameWorld world;
     private long lastFrameTimeNanos = 0;
+
+    // game score/state
+    private int score = 0;
+    private int playerHealth = 100;
+    private boolean gameOver = false;
 
     @Override
     public void start(Stage primaryStage) {
@@ -37,6 +47,9 @@ public class TankWarApp extends Application {
         InputState inputState = new InputState();
         GameObjectFactory factory = new GameObjectFactory(inputState);
         world = new GameWorld(factory);
+
+        // add listener
+        world.addListener(this);
 
         // Player tank
         Tank player = factory.createPlayerTank(100, 100);
@@ -96,9 +109,44 @@ public class TankWarApp extends Application {
 
                 world.update(deltaSeconds);
                 world.render(gc);
+
+                // Draw scores/state on top
+                gc.setFill(Color.BLACK);
+                gc.fillText("Score: " + score, 10, 20);
+                gc.fillText("Health: " + playerHealth, 10, 40);
+
+                if (gameOver) {
+                    gc.setFill(Color.RED);
+                    gc.fillText("GAME OVER", 350, 300);
+                }
             }
         };
         timer.start();
+    }
+
+    @Override
+    public void onGameEvent(GameEvent event) {
+        GameEventType type = event.getType();
+        TankEventSwitch:
+        switch (type) {
+            case PLAYER_HIT -> {
+                if (event.getTank() != null) {
+                    playerHealth = Math.max(0, event.getTank().getHealth());
+                }
+            }
+            case ENEMY_HIT -> {
+                // Void: do nothing.
+            }
+            case PLAYER_DESTROYED -> {
+                gameOver = true;
+                if (event.getTank() != null) {
+                    playerHealth = Math.max(0, event.getTank().getHealth());
+                }
+            }
+            case ENEMY_DESTROYED -> {
+                score += 100; // keeping scores
+            }
+        }
     }
 
     public static void main(String[] args) {

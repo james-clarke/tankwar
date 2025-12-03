@@ -2,6 +2,7 @@ package tankwar.model;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
 
 public class Tank extends GameObject {
 
@@ -36,8 +37,23 @@ public class Tank extends GameObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.setFill(Color.DARKGREEN);
-        gc.fillRect(x, y, width, height);
+        Image sprite = getSprite();
+        if (sprite != null) {
+            gc.drawImage(sprite, x, y, width, height);
+        } else {
+            // if we can't render the images, then use colors
+            gc.setFill(Color.DARKGREEN);
+            gc.fillRect(x, y, width, height);
+        }
+    }
+
+    private Image getSprite() {
+        return switch (direction) {
+            case UP -> ImageResources.TANK_UP;
+            case DOWN -> ImageResources.TANK_DOWN;
+            case LEFT -> ImageResources.TANK_LEFT;
+            case RIGHT -> ImageResources.TANK_RIGHT;
+        };
     }
 
     public int getHealth() {

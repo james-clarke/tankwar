@@ -8,14 +8,14 @@ public class RandomEnemyBehavior implements TankBehavior {
     private final GameConfig config = GameConfig.getInstance();
     private final Random random = new Random();
 
-    // Direction change timer
     private double timeUntilDirectionChange = 0.0;
 
-    // Fire cooldown
-    private double fireCooldown = 0.0;
+    // less cooldown than player
+    private double fireCooldown = 0.2;
 
     @Override
     public void update(Tank tank, GameWorld world, double deltaSeconds) {
+        // Direction changes
         timeUntilDirectionChange -= deltaSeconds;
         if (timeUntilDirectionChange <= 0) {
             Direction[] dirs = Direction.values();
@@ -34,7 +34,10 @@ public class RandomEnemyBehavior implements TankBehavior {
             case RIGHT -> tank.x += distance;
         }
 
-        // just fire as soon as cooldown is done
+        // keep enemy inside world
+        clampToWorldBounds(tank);
+
+        // randomly fire when cooldown ends
         fireCooldown -= deltaSeconds;
         if (fireCooldown < 0) {
             fireCooldown = 0;
@@ -46,5 +49,15 @@ public class RandomEnemyBehavior implements TankBehavior {
                 fireCooldown = 1.0; // slower firing
             }
         }
+    }
+
+    private void clampToWorldBounds(Tank tank) {
+        double maxX = config.getWorldWidth() - tank.getWidth();
+        double maxY = config.getWorldHeight() - tank.getHeight();
+
+        if (tank.x < 0) tank.x = 0;
+        if (tank.y < 0) tank.y = 0;
+        if (tank.x > maxX) tank.x = maxX;
+        if (tank.y > maxY) tank.y = maxY;
     }
 }

@@ -17,6 +17,14 @@ public class AliveTankState implements TankState {
 
         // Check health
         if (tank.getHealth() <= 0) {
+            if (world != null) {
+                boolean isPlayer = (world.getPlayerTank() == tank);
+                GameEventType type = isPlayer
+                        ? GameEventType.PLAYER_DESTROYED
+                        : GameEventType.ENEMY_DESTROYED;
+                world.notifyEvent(new GameEvent(type, tank));
+            }
+
             tank.setState(new ExplodingTankState());
         }
     }
