@@ -1,6 +1,6 @@
 # Tank War
 
-A simple 2D tank game implemented in Java 21 using JavaFX and Maven.
+A simple 2D tank game.
 
 ![](tankwar-demo.mp4)
 
