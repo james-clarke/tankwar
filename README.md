@@ -2,10 +2,6 @@
 
 A simple 2D tank game.
 
-![](tankwar-demo.mp4)
-
-GitHub repository: https://github.com/james-clarke/tankwar
-
 The project demonstrates the following design patterns:
 
 - **Singleton** – `GameConfig` (global configuration)
