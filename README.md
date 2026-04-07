@@ -1,4 +1,4 @@
-# Tank War (Java 21 + JavaFX + Maven)
+# Tank War
 
 A simple 2D tank game implemented in Java 21 using JavaFX and Maven.
 
